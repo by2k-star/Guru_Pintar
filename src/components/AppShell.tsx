@@ -4,6 +4,7 @@
  * Memasang AppProvider, sonner Toaster, dan men-set tema per jenjang.
  */
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { useState } from "react";
 import {
   Home,
   BookOpen,
@@ -13,6 +14,7 @@ import {
   FileQuestion,
   Settings,
   Menu,
+  X,
 } from "lucide-react";
 import { Toaster } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
@@ -34,6 +36,8 @@ const NAV_ITEMS = [
 function ShellInner() {
   const level = useLevelTheme();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <div className="min-h-screen flex bg-[var(--gp-surface)] text-foreground">
@@ -90,8 +94,72 @@ function ShellInner() {
             <div className="font-semibold leading-tight">{UI_LABELS.app.name}</div>
             <div className="text-[11px] text-muted-foreground truncate">{level.tagline}</div>
           </div>
-          <Menu className="size-5 opacity-60" />
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="p-2 rounded-md hover:bg-accent"
+          >
+            <Menu className="size-5" />
+          </button>
         </header>
+        
+        {mobileOpen && (
+  <div
+    className="fixed inset-0 z-40"
+    onClick={() => setMobileOpen(false)}
+  >
+    <div className="absolute inset-0 bg-black/40" />
+
+    <div
+      className="absolute top-0 left-0 h-full w-72 bg-background shadow-xl border-r p-4"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="flex justify-between items-center mb-4">
+        <div className="font-bold text-lg">
+          {UI_LABELS.app.name}
+        </div>
+
+        <button onClick={() => setMobileOpen(false)}>
+          <X className="size-5" />
+        </button>
+      </div>
+
+      <nav className="flex flex-col gap-2">
+
+        {NAV_ITEMS.map((item) => {
+
+          const Icon = item.icon;
+
+          const active =
+            item.to === "/"
+              ? pathname === "/"
+              : pathname.startsWith(item.to);
+
+          return (
+
+            <Link
+              key={item.to}
+              to={item.to}
+              onClick={() => setMobileOpen(false)}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-3",
+                active
+                  ? "bg-[var(--gp-primary)] text-white"
+                  : "hover:bg-accent"
+              )}
+            >
+              <Icon className="size-5" />
+              {item.label}
+            </Link>
+
+          );
+
+        })}
+
+      </nav>
+    </div>
+  </div>
+)}
+
 
         <main className="flex-1 px-4 md:px-8 lg:px-10 py-6 pb-24 md:pb-10">
           <AnimatePresence mode="wait">
